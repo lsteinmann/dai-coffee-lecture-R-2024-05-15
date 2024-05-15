@@ -1,0 +1,437 @@
+---
+title: "Was tun mit all den ScheRben?"
+subtitle: "Schnelle Antworten auf kleine Fragen mit R <br>(und Field Desktop)."
+author: "Lisa Steinmann"
+format: 
+  revealjs: 
+    theme: custom.scss
+    preview-links: true
+    df-print: kable
+    fig-width: 15
+    auto-stretch: true
+    scrollable: false
+    out-width: 100%
+    out-height: 100%
+editor: visual
+---
+
+```{r echo = FALSE}
+library(kableExtra)
+library(knitr)
+library(dplyr)
+knit_print.data.frame <- function (x, options, ...) {
+  rmarkdown::paged_table(x, options) %>%
+    rmarkdown:::print.paged_df()
+}
+registerS3method("knit_print", "data.frame", knit_print.data.frame)
+```
+
+## Was tun mit all den ScheRben?
+
+::: ups
+~~Schnelle~~ Keine Antworten ~~auf kleine~~ aber neue Fragen mit R (und Field Desktop).
+:::
+
+## Das Problem
+
+![Daten: Man kann eigentlich nie genug haben, aber irgendwie sind es auch zu viele.](img/screenshot_spreadsheet.png){.nostretch style="box-shadow: 0px !important;"}
+
+## Beispieldaten
+
+```{r warning=FALSE, echo=FALSE}
+data_raw <- readxl::read_xlsx("../data/SHA_PotteryCounting.xlsx")
+sumTotal <- sum(data_raw$SUM_Total, na.rm = TRUE)
+kgTotal <- sum(data_raw$SUM_kg, na.rm = TRUE)
+```
+
+-   Grobauszählung von Keramik inkl. undiagnostischer Scherben
+-   konsequente Eingaben und Datenqualität
+-   Ein Excel-Sheet: `r nrow(data_raw)` Zeilen und `r ncol(data_raw)` Spalten.
+-   Insgesamt `r format(sumTotal)` Scherben (`r format(kgTotal)`kg)
+
+::: infobox
+Herzlichen Dank an Simone Mühl für die Datenspende!
+
+**Infos zur Grabung: <https://shamlu.net>**
+:::
+
+## Woher weiß ich das?
+
+![Das ist der gesamte Code für die vorangegangene Folie.](img/quarto_folie_1.png)
+
+# R Basics
+
+::: infobox
+**Nathaniel D. Phillips**: *YaRrr! The Pirate’s Guide to R*.
+
+<https://bookdown.org/ndphillips/YaRrr/>
+:::
+
+## R Basics {auto-animate="true"}
+
+```{r echo = TRUE}
+a <- 27
+```
+
+## R Basics {auto-animate="true"}
+
+```{r echo = TRUE}
+a <- 27
+print(a)
+```
+
+## R Basics {auto-animate="true"}
+
+```{r echo = TRUE}
+a <- 27
+print(a)
+b <- a + 10
+#...
+```
+
+## R Basics {auto-animate="true"}
+
+```{r echo = TRUE}
+a <- 27
+print(a)
+b <- a + 10
+print(b)
+```
+
+## R Basics {auto-animate="true"}
+
+```{r echo = TRUE}
+a <- 27
+print(a)
+b <- a + 10
+print(b)
+c <- c(5, 10, 2.5, 2.5)
+#...
+```
+
+## R Basics {auto-animate="true"}
+
+```{r echo = TRUE}
+a <- 27
+print(a)
+b <- a + 10
+print(b)
+c <- c(5, 10, 2.5, 2.5)
+sum(c)
+```
+
+## R Basics {auto-animate="true"}
+
+```{r echo = TRUE}
+a <- 27
+print(a)
+b <- a + 10
+print(b)
+c <- c(5, 10, 2.5, 2.5)
+sum(c)
+mean(c)
+```
+
+
+## R Basics {auto-animate="true"}
+
+```{r echo = TRUE}
+c <- c(5, 10, 2.5, 2.5)
+```
+
+## R Basics {auto-animate="true"}
+
+```{r echo = TRUE}
+c <- c(5, 10, 2.5, 2.5)
+names(c) <- c("Wert 1", "Wert 2", "Wert 3", "Wert 4")
+barplot(c)
+```
+
+## R Basics {auto-animate="true"}
+
+```{r echo = TRUE}
+c <- c(5, 10, 2.5, 2.5)
+names(c) <- c("Wert 1", "Wert 2", "Wert 3", "Wert 4")
+
+library(dplyr)
+
+c %>%
+  barplot()
+```
+
+# R und Tabellen
+```{r echo = TRUE}
+data_raw <- readxl::read_xlsx("../data/SHA_PotteryCounting.xlsx")
+```
+
+## Woher sind all die Scherben? {auto-animate="true"}
+
+```{r echo = TRUE}
+# ...
+data_raw %>%
+  select(`Finds::Lot`, `Lots::Trench`, SUM_Total)
+```
+
+## Woher sind all die Scherben? {auto-animate="true"}
+
+```{r echo = TRUE}
+# ...
+data_raw %>%
+  select(`Finds::Lot`, `Lots::Trench`, SUM_Total) %>% 
+  # ...
+  head()
+```
+
+## Woher sind all die Scherben? {auto-animate="true"}
+
+```{r echo = TRUE}
+# ...
+data_raw %>%
+  select(`Finds::Lot`, `Lots::Trench`, SUM_Total) %>% 
+  rename(lot = `Finds::Lot`, trench = `Lots::Trench`) %>%
+  head()
+```
+
+## Woher sind all die Scherben? {auto-animate="true"}
+
+```{r echo = TRUE}
+# ...
+trench_lot_sum <- data_raw %>%
+  select(`Finds::Lot`, `Lots::Trench`, SUM_Total) %>% 
+  rename(lot = `Finds::Lot`, trench = `Lots::Trench`)
+```
+
+## Woher sind all die Scherben? {auto-animate="true"}
+
+```{r echo = TRUE }
+library(ggplot2)
+trench_lot_sum %>%
+  # ...
+  ggplot(aes(x = lot, y = SUM_Total, fill = trench)) +
+  geom_col()
+```
+
+## Woher sind all die Scherben? {auto-animate="true"}
+
+```{r echo = TRUE }
+trench_lot_sum %>%
+  filter(grepl("T1", trench)) %>%
+  ggplot(aes(x = lot, y = SUM_Total, fill = trench)) +
+  geom_col()
+```
+
+## Woher sind all die Scherben? {auto-animate="true"}
+
+```{r echo = TRUE }
+trench_lot_sum %>%
+  filter(grepl("T1", trench)) %>%
+  ggplot(aes(x = lot, y = SUM_Total, fill = trench)) +
+  geom_col() +
+  theme(axis.text.x = element_text(angle = 90))
+```
+
+```{r echo = FALSE}
+#' Falls jemand hier hereinschaut: Ich habe die Zeile unterschlagen, 
+#' weil sie nur für Plotly wichtig ist.
+#' Hier werden Zeilen, die die gleichen Werte haben, gruppiert, um die Popovers zu verbessern.
+trench_lot_sum <- trench_lot_sum %>%
+  group_by(trench, lot) %>%
+  summarise_at(vars(SUM_Total), sum, na.rm = TRUE)
+```
+
+## Woher sind all die Scherben? {auto-animate="true"}
+
+```{r echo = TRUE }
+p <- trench_lot_sum %>%
+  filter(grepl("T1", trench)) %>%
+  ggplot(aes(x = lot, y = SUM_Total, fill = trench)) +
+  geom_col() +
+  theme(axis.text.x = element_text(angle = 90))
+```
+
+## Woher sind all die Scherben? {auto-animate="true"}
+
+```{r echo = TRUE }
+#| fig-width: 10
+#| fig-height_: 5
+library(plotly)
+ggplotly(p)
+```
+
+## Woher sind all die Scherben? {auto-animate="true"}
+
+```{r echo = TRUE }
+trench_lot_sum %>%
+  filter(grepl("T2", trench)) %>%
+  ggplot(aes(x = trench, y = SUM_Total)) +
+  geom_boxplot()
+```
+
+## Was für Scherben eigentlich? {auto-animate="true"}
+```{r echo = TRUE}
+library(tidyr)
+sel <- data_raw %>%
+  select(lot = `Finds::Lot`, SUM_Total, starts_with("Body")) %>%
+  select(!ends_with("KG")) %>% select(!ends_with("SUM")) %>%
+  pivot_longer(starts_with("Body"), 
+               names_to = "SherdGroup", 
+               values_to = "count")
+
+sel$Fabric <- lapply(sel$SherdGroup, function(x) {
+  substr(x, nchar(x), nchar(x))
+}) %>% unlist()
+
+head(sel)
+```
+
+
+## Was für Scherben eigentlich? {auto-animate="true"}
+```{r echo = TRUE}
+sel <- sel %>%
+  mutate(SherdGroup = gsub(".$", "", SherdGroup)) %>%
+  mutate(SherdGroup = gsub("Body", "", SherdGroup)) %>%
+  group_by(lot, SUM_Total, SherdGroup, Fabric) %>%
+  summarise_at(vars(count), sum, na.rm = TRUE) %>%
+  filter(!count == 0)
+
+head(sel)
+```
+
+
+
+## Was für Scherben eigentlich? {auto-animate="true"}
+```{r echo = TRUE}
+sel %>%
+  ggplot(aes(x = count, y = SherdGroup, fill = Fabric)) +
+  geom_boxplot(alpha = 0.5) + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
+```
+
+## Was für Scherben eigentlich? {auto-animate="true"}
+```{r echo = TRUE}
+sel %>%
+  ggplot(aes(x = count, y = SherdGroup, fill = Fabric)) +
+  geom_boxplot(alpha = 0.5) + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
+  scale_x_log10()
+```
+
+
+# R und Field Desktop
+
+::: infobox
+**R-Paket *idaifieldR*** <https://github.com/lsteinmann/idaifieldR>
+
+*(Bessere Namensvorschläge nehme ich jederzeit entgegen...)*
+:::
+
+## Installieren und verbinden {auto-animate="true"}
+
+```{r eval = FALSE}
+remotes::install_github("lsteinmann/idaifieldR", build_vignettes = TRUE)
+```
+
+```{r echo = TRUE, message = TRUE}
+library(idaifieldR)
+conn <- connect_idaifield(pwd = "hallo", project = "milet")
+
+index <- get_field_index(conn, verbose = TRUE, gather_trenches = TRUE)
+head(index)
+```
+
+## Übersicht {auto-animate="true"}
+```{r echo = TRUE}
+library(forcats)
+index %>% 
+  filter(!category %in% c("Image", "TypeCatalog", "Type", "Drawing", "Photo")) %>%
+  ggplot(aes(x = fct_infreq(Place), fill = category)) +
+  geom_bar() +
+  labs(x = "Ort", y = "Anzahl", fill = "Kategorie") + 
+  theme(legend.position = "none", 
+        axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
+```
+
+## Datensätze importieren {auto-animate="true"}
+
+```{r echo = TRUE, message = FALSE}
+uv_raw <- idf_index_query(conn, uidlist = index,
+                          field = "Place",
+                          value = "Insula UV/8-9")
+```
+
+## Datensätze importieren {auto-animate="true"}
+
+```{r echo = TRUE, warning = FALSE, message = FALSE}
+uv <- uv_raw %>% 
+  simplify_idaifield(uidlist = index) %>%
+  idaifield_as_matrix() %>%
+  as.data.frame() %>%
+  type.convert(as.is = FALSE)
+head(uv)
+```
+
+## Daten darstellen: alle Schnitte {auto-animate="true"}
+```{r echo = TRUE}
+library(forcats)
+uv %>% 
+  filter(category %in% c("Pottery", "Loomweight", "Brick")) %>%
+  ggplot(aes(x = fct_infreq(relation.isRecordedIn), fill = category)) +
+  geom_bar() +
+  labs(x = "Schnitt", y = "Anzahl", fill = "Kategorie") + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
+```
+
+## Daten darstellen: ein Schnitt {auto-animate="true"}
+```{r echo = TRUE}
+library(forcats)
+uv %>% 
+  filter(relation.isRecordedIn == "HU22.H") %>%
+  ggplot(aes(x = fct_infreq(category), fill = workflow.Fotografiert)) +
+  geom_bar() +
+  labs(x = "Schnitt", y = "Anzahl", fill = "Kategorie") + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
+```
+
+## Daten darstellen: Keramik {auto-animate="true"}
+```{r echo = TRUE}
+uv %>%
+  filter(category == "Pottery") %>%
+  ggplot(aes(x = fct_infreq(potteryGroup), fill = functionalCategory)) + 
+  geom_bar() + 
+  labs(x = "Keramikgruppe", y = "Anzahl", fill = "Funktion") + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
+```
+
+
+## Daten darstellen {auto-animate="true"}
+```{r echo = TRUE}
+mil <- get_idaifield_docs(conn)
+date_created <- lapply(mil, function(x) x$doc$created)
+date_created <- do.call(bind_rows, date_created)
+date_created %>%
+  mutate(date = as.Date(date)) %>%
+  ggplot(aes(x = date, fill = user)) +
+  geom_histogram() + 
+  labs(x = "Erstellungsdatum", y = "Anzahl") + 
+  theme(legend.position = "bottom")
+```
+
+
+## Daten darstellen {auto-animate="true"}
+```{r echo = TRUE}
+date_created %>%
+  mutate(date = as.Date(date)) %>%
+  ggplot(aes(x = date, fill = user)) +
+  geom_histogram() + 
+  labs(x = "Erstellungsdatum", y = "Anzahl") + 
+  theme(legend.position = "none")
+```
+
+
+# Mehr und ausführlicher...
+::: infobox
+**R-Paket *idaifieldR*** <https://github.com/lsteinmann/idaifieldR>
+
+ *R wie in: Reproduzierbar. Auswertung von Daten aus Field Desktop mit idaifieldR*, Forum for Digital Archaeology and Infrastructure (2023): <https://doi.org/10.34780/068b-q6c7>
+:::
+
