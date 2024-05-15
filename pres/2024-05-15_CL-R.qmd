@@ -253,7 +253,7 @@ p <- trench_lot_sum %>%
 
 ```{r echo = TRUE }
 #| fig-width: 10
-#| fig-height_: 5
+#| fig-height_: 4
 library(plotly)
 ggplotly(p)
 ```
@@ -327,7 +327,7 @@ sel %>%
 
 ## Installieren und verbinden {auto-animate="true"}
 
-```{r eval = FALSE}
+```{r eval = FALSE, echo = TRUE}
 remotes::install_github("lsteinmann/idaifieldR", build_vignettes = TRUE)
 ```
 
